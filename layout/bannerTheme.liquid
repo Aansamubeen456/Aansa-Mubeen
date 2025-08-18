@@ -1,0 +1,12 @@
+<html>
+  <head>
+    {{ content_for_header }}
+    {{ 'banner.css' | asset_url | stylesheet_tag }}
+    {% comment %} {% render 'head' %} {% endcomment %}
+  </head>
+  <body>
+    <main role="main">
+      {{ content_for_layout }}
+    </main>
+  </body>
+</html>
