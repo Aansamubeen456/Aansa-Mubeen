@@ -43,11 +43,11 @@
         {% comment %} banner image {% endcomment %}
          <div class="banner-first-img">
           {% if section.settings.banner_image != blank %}
-            <div class="banner-img" style="background-image:url({{ section.settings.banner_image | image_url }})">
+            <div class="banner-img" style="background-image:url({{ section.settings.banner_image | image_url }});">
               </div>
 
             {% else %}
-              <div class="banner-img" style="background-image:url({{ 'Frame.png' | asset_url }})">
+              <div class="banner-img" style="background-image:url({{ 'Frame.png' | asset_url }});">
               </div>
           {% endif %}
          </div>
@@ -78,7 +78,7 @@
 
             <div class="banner-second-img">
               {% if section.settings.banner_section_image != blank %}
-                <div class="banner-section-img" style="background-image:url({{ section.settings.banner_section_image |image_url }})">
+                <div class="banner-section-img" style="background-image:url({{ section.settings.banner_section_image |image_url }});">
                 </div>
 
               {% else %}
