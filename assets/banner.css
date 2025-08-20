@@ -211,12 +211,11 @@ body {
     transform: translateX(-50%);
     z-index: 999;
   }
-   .ribbon-text {
-    display: none;
+  .ribbon-text {
+    font-size: 14px;
   }
   .mobile-ribbon-text {
     display: block;
-    font-size: 14px;
   }
 }
 
