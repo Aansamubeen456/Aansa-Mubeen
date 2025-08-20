@@ -1,17 +1,9 @@
-{% comment %} 
-
- parent div
- section div
-logo
-text
-button 
-{% endcomment %}
 <section class="section">
   <div class="nav-header">
 
     {% comment %} logo image for mobile {% endcomment %}
     <div class="toggle-btn">
-       <img src="{{ 'toggle-btn.png' |asset_url }}" >
+       <img src="{{ 'toggle-btn.png' | asset_url }}" >
     </div>
 
     <div class="logo">
@@ -20,7 +12,7 @@ button
           {% comment %} upload logo image {% endcomment %}
             <img src="{{ section.settings.logo |image_url }}" alt="{{section.settings.logo.alt | default:shop.name |escape}}" loading="eager">
        {% else %}
-        <img src="{{ 'logo.png' |asset_url }}" alt="{{ shop.name }}" loading="eager">
+        <img src="{{ 'logo.png' | asset_url }}" alt="{{ shop.name }}" loading="eager">
         {% endif %}
     </div>
 
@@ -38,7 +30,7 @@ button
               {{ section.settings.top_button_label }}
               </span>
               {% comment %} svg icon {% endcomment %}
-               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25"><path style="fill:#232326" d="m17.5 5.999-.707.707 5.293 5.293H1v1h21.086l-5.294 5.295.707.707L24 12.499l-6.5-6.5z" data-name="Right"/></svg>
+               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25"><path style="fill:currentColor;" d="m17.5 5.999-.707.707 5.293 5.293H1v1h21.086l-5.294 5.295.707.707L24 12.499l-6.5-6.5z" data-name="Right"/></svg>
             </div>
         </a>
         {% endif %}
@@ -61,18 +53,14 @@ button
          </div>
 
          {% comment %} Banner second part
-         2 sections
-         info
-         heading
-         text
-         btn
-         image 
+        
          {% endcomment %}
           <div class="banner-section">
 
             <div class="banner-info">
               <h1 class="banner-heading">{{ section.settings.heading }}</h1>
               <p class="banner-description">{{ section.settings.subheading }}</p>
+              <p class="mobile-banner-description">Discover Joy: Your Ultimate Holiday Gift Destination.</p>
               <div class="action-btn shop-btn">
                 {% if section.settings.primary_label != blank %}
                   <a href="{{ section.settings.primary_link }}">
@@ -81,7 +69,7 @@ button
                         {{ section.settings.primary_label }}
                         </span>
                         {% comment %} svg icon {% endcomment %}
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25"><path style="fill:#232326" d="m17.5 5.999-.707.707 5.293 5.293H1v1h21.086l-5.294 5.295.707.707L24 12.499l-6.5-6.5z" data-name="Right"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25"><path style="fill:currentColor;" d="m17.5 5.999-.707.707 5.293 5.293H1v1h21.086l-5.294 5.295.707.707L24 12.499l-6.5-6.5z" data-name="Right"/></svg>
                       </div>
                   </a>
                   {% endif %}
@@ -94,19 +82,20 @@ button
                 </div>
 
               {% else %}
-                <div class="banner-section-img" style="background-image:url({{ section.settings.'Frame2.png' |asset_url }})">
+                <div class="banner-section-img" style="background-image:url({{ section.settings.'Frame2.png' | asset_url }})">
                 </div>
 
                 {% endif %}
             </div>
+          </div>
 
             {% comment %} ribbon text {% endcomment %}
              <div class="ribbon-container">
               <p class="ribbon-text">
                 {{ section.settings.ribbon_text}}
                 </p>
+                <p class="mobile-ribbon-text">SUSTAINABLE, ETHICALLY MADE ACTIVEWEAR</p>
              </div>
-          </div>
 
 
 

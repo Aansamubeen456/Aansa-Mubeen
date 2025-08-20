@@ -1,0 +1,353 @@
+<section id="product-{{ section.id }}" class="product-section">
+  <div class="section-center">
+    {% if section.settings.heading != blank %}
+      <h2 class="product-heading">{{ section.settings.heading }}</h2>
+    {% endif %}
+{% comment %} products grid {% endcomment %}
+    <div class="products-grid">
+      {% for block in section.blocks %}
+         {% assign product_handle = block.settings.product %}
+         {% assign p = all_products[product_handle] %}
+
+       
+        <div class="single-product" {{ block.shopify_attributes }}>
+          {% if p != blank %}
+            <button type="button" class="product-item" data-block-id="{{ block.id }}" aria-label="View {{ p.title | escape }}">
+              {% if p.featured_media %}
+                {{ p.featured_media | image_url: width: 800 | image_tag: loading: 'lazy', alt: p.title, class: 'product-img' }}
+              {% else %}
+                <div class="product-img-placeholder">{{ 'image' | placeholder_svg_tag }}</div>
+              {% endif %}
+              <span class="product-item-overlay" aria-hidden="true">+</span>
+            </button>
+            <script type="application/json" id="pg-json-{{ block.id }}">{{ p | json }}</script>
+          {% else %}
+            <div class="product-item prooduct-item--empty">
+              <div class="product-img-placeholder">{{ 'image' | placeholder_svg_tag }}</div>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+
+  <!-- Modal -->
+  <div class="product-modal" data-open="false" aria-hidden="true">
+    <div class="product-modal-backdrop" data-pg-close></div>
+    <div class="product-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="pg-modal-title-{{ section.id }}">
+      <button class="product-modal-close" type="button" aria-label="Close" data-pg-close>
+        <img src="{{ 'closeModal.png' |asset_url}}"/>
+      </button>
+
+      <div class="product-modal-header">
+        <div class="product-modal-image"><img alt="" class="product-modal-img"></div>
+        <div class="product-modal-info">
+          <h2 id="product-modal-title-{{ section.id }}" class="product-modal-title"></h2>
+          <div class="product-modal-price"></div>
+          <div class="product-modal-desc"></div>
+        </div>
+      </div>
+
+      <form class="product-modal-form" onsubmit="return false;">
+        <div class="product-options"></div>
+        <button type="button" class="product-add btn-primary">
+          <span>Add to cart</span>
+          <img src="{{ 'white-arrow.png' |asset_url}}">
+         
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+ <script>
+
+  const sectionEl = document.getElementById('product-{{ section.id }}');
+    const modal = sectionEl.querySelector('.product-modal');
+    const modalDialog = modal.querySelector('.product-modal-dialog');
+    const imgEl = modal.querySelector('.product-modal-img');
+    const titleEl = modal.querySelector('.product-modal-title');
+    const priceEl = modal.querySelector('.product-modal-price');
+    const descEl = modal.querySelector('.product-modal-desc');
+    const optionsWrap = modal.querySelector('.product-options');
+    const addBtn = modal.querySelector('.product-add');
+
+    const moneyFormat = {{ shop.money_format | json }};
+    let currentProduct = null;
+    let currentSelection = [];
+    let currentVariant = null;
+    
+
+
+{% comment %} format money {% endcomment %}
+   function formatMoney(cents){
+      if (window.Shopify && Shopify.formatMoney) return Shopify.formatMoney(cents, moneyFormat); 
+
+      const currency =  window.storeCurrency = "{{ shop.currency }}";
+      return `${cents}${currency}`;
+
+    }
+
+
+    {% comment %}  get option values{% endcomment %}
+     function getOptionValues(product, idx){
+           const set = new Set();
+           product.variants.forEach(v => { const val = v['option'+(idx+1)]; if (val) set.add(val); });
+           return Array.from(set);
+         }
+
+         {% comment %} find variant {% endcomment %}
+           function findVariant(product, selected){
+      return product.variants.find(v => selected.every((val,i)=> (v['option'+(i+1)]||'') === val));
+    }
+
+         {% comment %} build options  {% endcomment %}
+
+     function buildOptions(product){
+      optionsWrap.innerHTML = '';
+      currentSelection = [];
+      product.options.forEach((name, idx) => {
+        const group = document.createElement('div');
+        group.className = 'product-opt-group';
+        const label = document.createElement('div');
+        label.className = 'product-opt-label';
+        label.textContent = name;
+        const values = document.createElement('div');
+        values.className = 'product-opt-values';
+        const opts = getOptionValues(product, idx);
+        opts.forEach((val, i) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'product-opt';
+          b.textContent = val;
+          b.setAttribute('data-value', val);
+          b.setAttribute('aria-pressed', 'false');
+          b.addEventListener('click', () => {
+            // toggle selection for this index
+            [...values.querySelectorAll('.product-opt')].forEach(x=>x.setAttribute('aria-pressed','false'));
+            b.setAttribute('aria-pressed','true');
+            currentSelection[idx] = val;
+            const v = findVariant(product, currentSelection);
+            if (v){ currentVariant = v; updatePrice(v); updateMedia(product, v); }
+          });
+          values.appendChild(b);
+        });
+        group.appendChild(label); group.appendChild(values); optionsWrap.appendChild(group);
+      });
+
+      // Default to first available variant and pre-press buttons accordingly
+      const firstAvail = product.variants.find(v=> v.available) || product.variants[0];
+      currentVariant = firstAvail;
+      currentSelection = [firstAvail.option1, firstAvail.option2, firstAvail.option3].filter(Boolean);
+      product.options.forEach((_, idx)=>{
+        const val = currentSelection[idx];
+        if(!val) return;
+        const values = optionsWrap.querySelectorAll('.product-opt-values')[idx];
+        const btn = [...values.querySelectorAll('.product-opt')].find(x=>x.dataset.value===val);
+        if(btn){ btn.setAttribute('aria-pressed','true'); }
+      });
+    } 
+
+
+       {% comment %} update price  {% endcomment %}
+           function updatePrice(variant){ priceEl.textContent = formatMoney(Number(variant.price)); }
+
+
+       {% comment %} update media  {% endcomment %}
+
+    function updateMedia(product, variant){
+      let src = null;
+
+  if (variant && variant.featured_image && variant.featured_image.src) {
+    src = variant.featured_image.src;
+  } else if (product.featured_image) {
+    src = product.featured_image;
+  } else if (product.images && product.images.length > 0) {
+    src = product.images[0];
+  }
+
+  if (src) {
+    imgEl.src = src;
+  } else {
+    console.warn("No image found for product:", product.title);
+  }
+}
+   
+
+{% comment %} open modal {% endcomment %}
+ function openModal(product){
+  console.log(product);
+    if (!product || !Array.isArray(product.options)) {
+    console.log('Product options missing or invalid:', product);
+    return;
+  }
+
+      currentProduct = product;
+      titleEl.textContent = product.title;
+      descEl.innerHTML = product.description || '';
+      buildOptions(product);
+      updatePrice(currentVariant);
+      updateMedia(product, currentVariant);
+      modal.setAttribute('data-open','true');
+      modal.setAttribute('aria-hidden','false');
+      document.addEventListener('keydown', onEsc);
+    }
+
+    {% comment %}  close modal {% endcomment %}
+       function closeModal(){
+      modal.setAttribute('data-open','false');
+      modal.setAttribute('aria-hidden','true');
+      document.removeEventListener('keydown', onEsc);
+    }
+
+{% comment %} onEsc key press  {% endcomment %}
+ const onEsc = (e)=>{
+   if(e.key==='Escape') closeModal();
+ }
+
+let bonusProduct = null; 
+
+/*
+ * Load the bonus product JSON from the known handle.
+ */
+async function loadBonusProduct() {
+  try {
+    const res = await fetch('/products/dark-winter-jacket.js', { credentials: 'same-origin' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    bonusProduct = await res.json();   
+  } catch (e) {
+    console.error('[BONUS] Failed to load bonus product', e);
+    bonusProduct = null;
+  }
+}
+
+/* Normalize a string to lower-case trimmed text. */
+function norm(v) {
+  return String(v ?? '').toLowerCase().trim();
+}
+
+/** Returns true if any of values[] matches any of targets[] exactly (after normalize). */
+function hasAny(values, targets) {
+  const set = new Set(values.map(norm));
+  return targets.map(norm).some(t => set.has(t));
+}
+
+/*
+ * check if currentVariant should trigger the bonus rule.
+
+ */
+function shouldAddBonusByVariant(variant) {
+  if (!variant) return false;
+  const vals = [variant.option1, variant.option2, variant.option3].filter(Boolean).map(norm);
+  const isBlack = hasAny(vals, ['black']);
+  // Accept both "m" and "medium" to be future‑proof
+  const isMedium = hasAny(vals, ['m', 'medium']);
+  return isBlack && isMedium;
+}
+
+/** Attach all listeners and wire up add-to-cart + bonus rule. */
+async function initProducts() {
+  await loadBonusProduct();
+
+  // Product item open modal
+  sectionEl.querySelectorAll('.product-item[data-block-id]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.blockId;
+      const node = document.getElementById('pg-json-' + id);
+      if (!node) return;
+      try {
+        openModal(JSON.parse(node.textContent));
+      } catch (e) {
+        console.error('Parse product JSON failed', e);
+      }
+    });
+  });
+
+  // Close modal
+  modal.querySelectorAll('[data-pg-close]').forEach(el => el.addEventListener('click', closeModal));
+
+  // Add to cart + conditional bonus
+  addBtn.addEventListener('click', async () => {
+    try {
+      if (!currentVariant) {
+        return;
+      }
+
+
+      const addMain = await fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ id: currentVariant.id, quantity: 1 })
+      });
+      if (!addMain.ok) {
+        const txt = await addMain.text();
+        throw new Error(`Add main failed: ${addMain.status} ${txt}`);
+      }
+
+      // Check rule using the variant itself
+      const shouldBonus = shouldAddBonusByVariant(currentVariant);
+
+      if (shouldBonus && bonusProduct) {
+        const bonusV = (bonusProduct.variants || []).find(v => v.available) || bonusProduct.variants?.[0];
+        if (bonusV) {
+          const addBonus = await fetch('/cart/add.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ id: bonusV.id, quantity: 1 })
+          });
+          if (!addBonus.ok) {
+            const txt = await addBonus.text();
+          }
+        } else {
+          console.warn('[BONUS] No variant available for bonus product');
+        }
+      } else if (shouldBonus && !bonusProduct) {
+        console.warn('[BONUS] Rule matched but bonusProduct is not loaded');
+      }
+
+      closeModal();
+      document.dispatchEvent(new CustomEvent('cart:refresh'));
+    } catch (e) {
+      console.error('Add to cart failed', e);
+    }
+  });
+}
+
+initProducts();
+
+
+  </script>
+
+{% schema %}
+ {
+  "name": "Product Grid Layout",
+  "settings": [
+   {
+    "type": "text",
+    "id": "heading",
+    "label": "Heading",
+    "default":"Tisso vison in the wild"
+   },
+   
+
+  ],
+  "blocks": [
+   {
+    "type": "product_card",
+    "name":"Product Card",
+    "limit": 6,
+    "settings": [
+     {
+      "type": "product",
+      "label": "Product",
+      "id": "product"
+     }
+    ]
+   }
+  ]
+
+ }
+{% endschema %}
