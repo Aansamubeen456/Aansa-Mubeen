@@ -434,11 +434,11 @@ body {
   }
 
   .product-section {
-    padding-top: 90px;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .product-heading {
-    padding-bottom: 0px;
     text-align: center;
   }
 }
