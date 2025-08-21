@@ -432,12 +432,21 @@ body {
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .product-section {
+    padding-top: 90px;
+  }
+
+  .product-heading {
+    padding-bottom: 0px;
+    text-align: center;
+  }
 }
-@media (max-width: 520px) {
+/* @media (max-width: 520px) {
   .products-grid {
     grid-template-columns: 1fr;
   }
-}
+} */
 @keyframes pg-fade-in {
   to {
     opacity: 1;
