@@ -1,9 +1,184 @@
-<h1>hello from banner page</h1>
+<section class="section">
+  <div class="nav-header">
+
+    {% comment %} logo image for mobile {% endcomment %}
+    <div class="toggle-btn">
+       <img src="{{ 'toggle-btn.png' | asset_url }}" >
+    </div>
+
+    <div class="logo">
+      {% comment %} logo image for desktop {% endcomment %}
+       {% if section.settings.logo !=blank %}
+          {% comment %} upload logo image {% endcomment %}
+            <img src="{{ section.settings.logo |image_url }}" alt="{{section.settings.logo.alt | default:shop.name |escape}}" loading="eager">
+       {% else %}
+        <img src="{{ 'logo.png' | asset_url }}" alt="{{ shop.name }}" loading="eager">
+        {% endif %}
+    </div>
+
+    {% comment %} promo text {% endcomment %}
+     <div class="promo-text">
+      {{ section.settings.promo_text }}
+     </div>
+
+    {% comment %} choose gift btn {% endcomment %}
+     <div class="action-btn top-right-btn">
+      {% if section.settings.top_button_label !=blank %}
+        <a href="{{ section.settings.top_button_link }}">
+          <div class="btn-info">
+            <span>
+              {{ section.settings.top_button_label }}
+              </span>
+              {% comment %} svg icon {% endcomment %}
+               <svg xmlns="http://www.w3.org/2000/svg" width="60" height="28" viewBox="0 0 25 25"><path style="fill:currentColor;" d="m17.5 5.999-.707.707 5.293 5.293H1v1h21.086l-5.294 5.295.707.707L24 12.499l-6.5-6.5z" data-name="Right"/></svg>
+            </div>
+        </a>
+        {% endif %}
+    </div>
+{% comment %} end of choose gift button {% endcomment %}
+
+    </div>
+{% comment %} end of nav header {% endcomment %}
+
+        {% comment %} banner image {% endcomment %}
+         <div class="banner-first-img">
+          {% if section.settings.banner_image != blank %}
+            <div class="banner-img" style="background-image:url({{ section.settings.banner_image | image_url }});">
+              </div>
+
+            {% else %}
+              <div class="banner-img" style="background-image:url({{ 'Frame.png' | asset_url }});">
+              </div>
+          {% endif %}
+         </div>
+
+         {% comment %} Banner second part
+        
+         {% endcomment %}
+          <div class="banner-section">
+
+            <div class="banner-info">
+              <h1 class="banner-heading">{{ section.settings.heading }}</h1>
+              <p class="banner-description">{{ section.settings.subheading }}</p>
+              <p class="mobile-banner-description">Discover Joy: Your Ultimate Holiday Gift Destination.</p>
+              <div class="action-btn shop-btn">
+                {% if section.settings.primary_label != blank %}
+                  <a href="{{ section.settings.primary_link }}">
+                    <div class="btn-info">
+                      <span>
+                        {{ section.settings.primary_label }}
+                        </span>
+                        {% comment %} svg icon {% endcomment %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="28" viewBox="0 0 25 25"><path style="fill:currentColor;" d="m17.5 5.999-.707.707 5.293 5.293H1v1h21.086l-5.294 5.295.707.707L24 12.499l-6.5-6.5z" data-name="Right"/></svg>
+                      </div>
+                  </a>
+                  {% endif %}
+              </div>
+            </div>
+
+            <div class="banner-second-img">
+              {% if section.settings.banner_section_image != blank %}
+                <div class="banner-section-img" style="background-image:url({{ section.settings.banner_section_image |image_url }});">
+                </div>
+
+              {% else %}
+                 <div class="banner-section-img"
+                  style="background-image: url({{ 'Frame.png' | asset_url }});">
+                  </div>
+
+                {% endif %}
+            </div>
+          </div>
+
+            {% comment %} ribbon text {% endcomment %}
+             <div class="ribbon-container">
+              <p class="ribbon-text">
+                {{ section.settings.ribbon_text}}
+                </p>
+                <p class="mobile-ribbon-text">SUSTAINABLE, ETHICALLY MADE ACTIVEWEAR</p>
+             </div>
+
+
+
+</section>
 
 {% schema %}
 {
- "name": "Gift Banner",
+  "name": "Gift Banner",
   "tag": "section",
+
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "text",
+      "id": "promo_text",
+      "label": "Top Promo Text",
+      "default":"Find the ideal gift for your loved ones."
+    },
+    {
+      "type": "text",
+      "id": "top_button_label",
+      "label": "Top right button label",
+      "default":"CHOOSE GIFT"
+    },
+    {
+      "type": "url",
+      "id": "top_button_link",
+      "label": "Top Right button link"
+    },
+    {
+      "type":"text",
+      "id": "heading",
+      "label": "Main Heading",
+      "default":"The Gift Guide"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Description",
+      "default":"Discover Joy: Your Ultimate Holiday Gift Destination. Explore our curated selection and find the perfect gifts to delight your loved ones this holiday season."
+    },
+     {
+      "type": "text",
+      "id": "primary_label",
+      "label": "Primary button label",
+      "default":"SHOP NOW"
+    },
+    {
+      "type": "url",
+      "id": "primary_link",
+      "label": "Primary button link"
+    },
+
+    {
+      "type": "image_picker",
+      "id": "banner_image",
+      "label": "Banner"
+    },
+    {
+      
+      "type": "image_picker",
+      "id": "banner_section_image",
+      "label": "Banner section image"
+    },
+    {
+      "type": "text",
+      "id": "ribbon_text",
+      "label": "Ribbon Text",
+      "default":"SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL"
+    },
+    
+  ],
+  "presets": [
+    {
+      "name": "Gift Banner",
+      "category": "Banners"
+    }
+  ]
 
 }
 {% endschema %}
